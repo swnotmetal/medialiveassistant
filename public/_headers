@@ -1,0 +1,8 @@
+/*
+  # Strict CSP for a client-side SPA.
+  # Allows only our bundle, Google Fonts, Gemini API, and Jina Reader.
+  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src 'self' https://generativelanguage.googleapis.com https://r.jina.ai; img-src 'self' data:; frame-src 'none'; object-src 'none'; base-uri 'self'
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()

@@ -256,7 +256,7 @@ export default function MainWorkspace({ settings, onSettingsUpdate }: Props) {
             <div className="flex items-center bg-zinc-900 border border-zinc-800 rounded-lg p-0.5 gap-0.5">
               <button
                 onClick={() => setInputMode('text')}
-                className={`px-3 py-1 rounded-md text-[10px] font-bold tracking-[0.1em] uppercase transition-all duration-150 ${
+                className={`px-4 py-1.5 rounded-md text-xs font-bold tracking-[0.08em] uppercase transition-all duration-150 ${
                   inputMode === 'text' ? 'bg-zinc-700 text-zinc-100' : 'text-zinc-500 hover:text-zinc-400'
                 }`}
               >
@@ -264,7 +264,7 @@ export default function MainWorkspace({ settings, onSettingsUpdate }: Props) {
               </button>
               <button
                 onClick={() => setInputMode('url')}
-                className={`px-3 py-1 rounded-md text-[10px] font-bold tracking-[0.1em] uppercase transition-all duration-150 ${
+                className={`px-4 py-1.5 rounded-md text-xs font-bold tracking-[0.08em] uppercase transition-all duration-150 ${
                   inputMode === 'url' ? 'bg-zinc-700 text-zinc-100' : 'text-zinc-500 hover:text-zinc-400'
                 }`}
               >

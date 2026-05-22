@@ -103,7 +103,7 @@ export default function SettingsModal({ settings, onUpdate, onClose }: Props) {
                   type={showGemini ? 'text' : 'password'}
                   value={apiKey}
                   onChange={e => setApiKey(e.target.value)}
-                  placeholder="AIza…"
+                  placeholder=""
                   className="field pr-10"
                   autoComplete="off"
                 />
@@ -150,7 +150,7 @@ export default function SettingsModal({ settings, onUpdate, onClose }: Props) {
                   type={showOpenai ? 'text' : 'password'}
                   value={openaiApiKey}
                   onChange={e => setOpenaiApiKey(e.target.value)}
-                  placeholder="sk-…"
+                  placeholder=""
                   className="field pr-10"
                   autoComplete="off"
                 />

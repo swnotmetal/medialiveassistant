@@ -1,7 +1,7 @@
 # 貉捷 · Tanuki
 
 <p align="center">
-  <img src="src/assets/logo/tanukilogo.png" width="128" height="128" alt="貉捷 Tanuki" />
+  <img src="src/assets/logo/tanukilogo-removebg.png" width="128" height="128" alt="貉捷 Tanuki" />
 </p>
 
 <p align="center">

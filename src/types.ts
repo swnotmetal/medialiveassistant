@@ -6,6 +6,7 @@ export interface PromptItem {
 
 export interface AppSettings {
   apiKey: string
+  openaiApiKey: string
   model: string
   prompts: PromptItem[]
 }
@@ -16,12 +17,21 @@ export interface TokenUsage {
   requestCount: number
 }
 
-export const AVAILABLE_MODELS = [
-  { id: 'gemini-2.0-flash',      name: 'Gemini 2.0 Flash',      note: '最新 · 免费 · 推荐' },
-  { id: 'gemini-2.0-flash-lite', name: 'Gemini 2.0 Flash Lite', note: '极速 · 免费' },
-  { id: 'gemini-1.5-flash',      name: 'Gemini 1.5 Flash',      note: '稳定 · 免费' },
-  { id: 'gemini-1.5-pro',        name: 'Gemini 1.5 Pro',        note: '高质量 · 有限免费' },
-  { id: 'gemini-2.5-pro',        name: 'Gemini 2.5 Pro',        note: '最强 · 付费' },
+export type Provider = 'gemini' | 'openai'
+
+export const AVAILABLE_MODELS: { id: string; name: string; note: string; provider: Provider }[] = [
+  // Gemini 2.5 — current stable generation, free tier available
+  { id: 'gemini-2.5-flash',      name: 'Gemini 2.5 Flash',      note: '快速 · 免费 · 推荐',  provider: 'gemini' },
+  { id: 'gemini-2.5-flash-lite', name: 'Gemini 2.5 Flash Lite', note: '极速 · 最省费',        provider: 'gemini' },
+  { id: 'gemini-2.5-pro',        name: 'Gemini 2.5 Pro',        note: '高质量 · 有限免费',    provider: 'gemini' },
+  // Gemini 3.x — newest generation
+  { id: 'gemini-3.5-flash',      name: 'Gemini 3.5 Flash',      note: '最新旗舰 · 付费',      provider: 'gemini' },
+  { id: 'gemini-3.1-flash-lite', name: 'Gemini 3.1 Flash Lite', note: '最新轻量 · 付费',      provider: 'gemini' },
+  // OpenAI
+  { id: 'gpt-4o-mini',           name: 'GPT-4o mini',           note: '快速 · 省费',          provider: 'openai' },
+  { id: 'gpt-4o',                name: 'GPT-4o',                note: '均衡 · 通用',          provider: 'openai' },
+  { id: 'gpt-4.1-mini',          name: 'GPT-4.1 mini',          note: '指令优化 · 省费',      provider: 'openai' },
+  { id: 'o4-mini',               name: 'o4-mini',               note: '深度推理',             provider: 'openai' },
 ]
 
 // Translation prompt auto-detects language — never translates back to source

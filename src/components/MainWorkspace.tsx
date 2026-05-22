@@ -1,7 +1,8 @@
 import React, { useState, useRef, useCallback, useEffect, CSSProperties } from 'react'
 import tanukilogo from '../assets/logo/tanukilogo-removebg.png'
-import { AppSettings, PromptItem, TokenUsage } from '../types'
+import { AppSettings, PromptItem, TokenUsage, AVAILABLE_MODELS } from '../types'
 import { callGemini } from '../utils/gemini'
+import { callOpenAI } from '../utils/openai'
 import { fetchArticle, estimateTokens, MAX_ARTICLE_CHARS } from '../utils/fetchUrl'
 import { loadTokenUsage, saveTokenUsage, clearSession } from '../utils/storage'
 import SettingsModal from './SettingsModal'
@@ -98,18 +99,18 @@ export default function MainWorkspace({ settings, onSettingsUpdate }: Props) {
       setError(inputMode === 'url' ? '请先抓取一个链接' : '请先输入需要处理的文字')
       return
     }
-    if (!settings.apiKey) { setError('请在设置中填入 API Key'); setShowSettings(true); return }
+    const provider = AVAILABLE_MODELS.find(m => m.id === settings.model)?.provider ?? 'gemini'
+    const activeKey = provider === 'openai' ? settings.openaiApiKey : settings.apiKey
+    if (!activeKey) { setError('请在设置中填入 API Key'); setShowSettings(true); return }
 
     abortRef.current?.abort()
     abortRef.current = new AbortController()
     setActiveId(prompt.id); setLoading(true); setError(''); setOutputText('')
 
     try {
-      const result = await callGemini(
-        settings.apiKey, settings.model, prompt.prompt, text,
-        t => setOutputText(t),
-        abortRef.current.signal,
-      )
+      const result = provider === 'openai'
+        ? await callOpenAI(activeKey, settings.model, prompt.prompt, text, t => setOutputText(t), abortRef.current.signal)
+        : await callGemini(activeKey, settings.model, prompt.prompt, text, t => setOutputText(t), abortRef.current.signal)
       const prev    = loadTokenUsage()
       const updated = {
         inputTokens:  prev.inputTokens  + (result.inputTokens  || Math.ceil((prompt.prompt.length + text.length) / 2)),
@@ -303,8 +304,8 @@ export default function MainWorkspace({ settings, onSettingsUpdate }: Props) {
               onChange={e => setInputText(e.target.value)}
               placeholder={"粘贴或输入需要处理的文字…\n\n支持新闻稿、采访记录、外文内容等。"}
               className="flex-1 min-h-0 w-full bg-zinc-900 border border-zinc-800 rounded-2xl
-                         px-5 py-4 text-zinc-100 text-sm leading-relaxed resize-none
-                         placeholder-zinc-600 focus:outline-none focus:border-zinc-700
+                         px-5 py-5 text-zinc-100 text-base leading-relaxed resize-none
+                         placeholder-zinc-500 focus:outline-none focus:border-zinc-700
                          transition-colors duration-200"
             />
 
@@ -358,18 +359,17 @@ export default function MainWorkspace({ settings, onSettingsUpdate }: Props) {
                                             'bg-zinc-900/50 border-zinc-800/50'
               }`}>
                 {fetchStatus === 'fetching' && (
-                  <div className="flex items-center gap-2 text-sky-500 text-sm">
+                  <div className="flex items-center gap-2 text-sky-500 text-[15px]">
                     <span className="spinner" />
                     正在抓取正文…
                   </div>
                 )}
                 {fetchStatus === 'error' && (
-                  <p className="text-red-400 text-sm">{fetchError}</p>
+                  <p className="text-red-400 text-[15px]">{fetchError}</p>
                 )}
                 {fetchStatus === 'done' && fetchedContent && (
                   <>
-                    <p className="text-zinc-100 text-sm leading-relaxed whitespace-pre-wrap">{fetchedContent}</p>
-                    {/* Token efficiency info */}
+                    <p className="text-zinc-100 text-[15px] leading-relaxed whitespace-pre-wrap">{fetchedContent}</p>
                     <div className="mt-4 pt-3 border-t border-zinc-800 flex items-center gap-3 text-[11px] text-zinc-500">
                       <span>{fetchedContent.length.toLocaleString()} 字</span>
                       <span>·</span>
@@ -381,7 +381,7 @@ export default function MainWorkspace({ settings, onSettingsUpdate }: Props) {
                   </>
                 )}
                 {fetchStatus === 'idle' && (
-                  <p className="text-zinc-600 text-sm select-none leading-relaxed">
+                  <p className="text-zinc-500 text-[15px] select-none leading-relaxed">
                     支持 BBC、CNN、纽约时报、财新、澎湃等主流新闻网站。<br />
                     通过 Jina Reader 抓取正文，免费且节省 token。
                   </p>
@@ -422,8 +422,8 @@ export default function MainWorkspace({ settings, onSettingsUpdate }: Props) {
               </div>
             )}
           </div>
-          <div className={`flex-1 min-h-0 overflow-y-auto bg-zinc-900 rounded-2xl px-5 py-4
-              text-zinc-100 text-sm leading-relaxed border transition-colors duration-200
+          <div className={`flex-1 min-h-0 overflow-y-auto bg-zinc-900 rounded-2xl px-5 py-5
+              text-zinc-100 text-[15px] leading-relaxed border transition-colors duration-200
               ${loading ? 'border-sky-500/20' : 'border-zinc-800'}`}
           >
             {outputText

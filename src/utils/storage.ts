@@ -85,14 +85,17 @@ export async function sha256(text: string): Promise<string> {
 export function getStoredHash(): string | null { return localStorage.getItem(AUTH_KEY) }
 export function isSessionAuthed(): boolean     { return sessionStorage.getItem(SESSION_FLAG) === '1' }
 
-/** Called on first-ever setup: create salt, derive key, hash password, open session. */
+/** Called on first-ever setup: create salt, derive key, store PBKDF2 sentinel, open session. */
 export async function setupPassword(password: string): Promise<void> {
   const salt = new Uint8Array(16)
   crypto.getRandomValues(salt)
   const key  = await pbkdf2Key(password, salt)
   const jwk  = await crypto.subtle.exportKey('jwk', key)
 
-  localStorage.setItem(AUTH_KEY, await sha256(password))
+  // Store AES-GCM encrypted sentinel instead of a plain SHA-256 hash.
+  // Verification = try to decrypt and check the plaintext matches.
+  const sentinel = await aesEncrypt('tanuki-ok', key)
+  localStorage.setItem(AUTH_KEY, sentinel)
   localStorage.setItem(SALT_KEY, b64encode(salt.buffer))
   sessionStorage.setItem(SESSION_CKEY, JSON.stringify(jwk))
   sessionStorage.setItem(SESSION_FLAG, '1')
@@ -100,13 +103,25 @@ export async function setupPassword(password: string): Promise<void> {
 
 /** Called on every login: verify password, re-derive key, open session. */
 export async function loginWithPassword(password: string): Promise<boolean> {
-  const stored = localStorage.getItem(AUTH_KEY)
-  if (!stored || (await sha256(password)) !== stored) return false
-
+  const stored  = localStorage.getItem(AUTH_KEY)
   const saltB64 = localStorage.getItem(SALT_KEY)
-  if (!saltB64) return false                // pre-encryption install; treat as wrong password
+  if (!stored || !saltB64) return false
 
   const key = await pbkdf2Key(password, b64decode(saltB64))
+
+  if (stored.includes(':')) {
+    // New format: iv:ciphertext sentinel
+    try {
+      const plain = await aesDecrypt(stored, key)
+      if (plain !== 'tanuki-ok') return false
+    } catch { return false }
+  } else {
+    // Legacy format: plain SHA-256 hash — verify then auto-upgrade
+    if ((await sha256(password)) !== stored) return false
+    const sentinel = await aesEncrypt('tanuki-ok', key)
+    localStorage.setItem(AUTH_KEY, sentinel)
+  }
+
   const jwk = await crypto.subtle.exportKey('jwk', key)
   sessionStorage.setItem(SESSION_CKEY, JSON.stringify(jwk))
   sessionStorage.setItem(SESSION_FLAG, '1')
@@ -123,12 +138,14 @@ export function clearSession(): void {
 interface StoredSettings {
   model: string
   prompts: import('../types').PromptItem[]
-  encApiKey?: string   // AES-GCM ciphertext; absent if key not yet saved
+  encApiKey?: string        // AES-GCM ciphertext of Gemini API key
+  encOpenaiApiKey?: string  // AES-GCM ciphertext of OpenAI API key
 }
 
 const DEFAULTS: AppSettings = {
   apiKey: '',
-  model: 'gemini-2.0-flash',
+  openaiApiKey: '',
+  model: 'gemini-2.5-flash',
   prompts: DEFAULT_PROMPTS,
 }
 
@@ -138,32 +155,31 @@ export async function loadSettings(): Promise<AppSettings> {
     if (!raw) return { ...DEFAULTS }
     const s: StoredSettings = JSON.parse(raw)
 
+    const key = await sessionKey()
     let apiKey = ''
-    if (s.encApiKey) {
-      const key = await sessionKey()
-      if (key) {
-        try { apiKey = await aesDecrypt(s.encApiKey, key) } catch { /* wrong key / corrupted */ }
-      }
+    let openaiApiKey = ''
+    if (key) {
+      if (s.encApiKey)       try { apiKey       = await aesDecrypt(s.encApiKey,       key) } catch {}
+      if (s.encOpenaiApiKey) try { openaiApiKey = await aesDecrypt(s.encOpenaiApiKey, key) } catch {}
     }
-    return { model: s.model ?? DEFAULTS.model, prompts: s.prompts ?? DEFAULTS.prompts, apiKey }
+    return { model: s.model ?? DEFAULTS.model, prompts: s.prompts ?? DEFAULTS.prompts, apiKey, openaiApiKey }
   } catch { return { ...DEFAULTS } }
 }
 
 export function saveSettings(settings: AppSettings): void {
-  // Save prompts + model immediately (no sensitive data).
   const stored: StoredSettings = { model: settings.model, prompts: settings.prompts }
   localStorage.setItem(SETTINGS_KEY, JSON.stringify(stored))
 
-  // Encrypt API key asynchronously and re-save if a key is present.
-  if (settings.apiKey) {
-    sessionKey().then(key => {
-      if (!key) return
-      aesEncrypt(settings.apiKey, key).then(enc => {
-        stored.encApiKey = enc
-        localStorage.setItem(SETTINGS_KEY, JSON.stringify(stored))
-      }).catch(() => {})
-    }).catch(() => {})
-  }
+  sessionKey().then(key => {
+    if (!key) return
+    const tasks: Promise<void>[] = []
+    if (settings.apiKey)
+      tasks.push(aesEncrypt(settings.apiKey, key).then(enc => { stored.encApiKey = enc }))
+    if (settings.openaiApiKey)
+      tasks.push(aesEncrypt(settings.openaiApiKey, key).then(enc => { stored.encOpenaiApiKey = enc }))
+    if (tasks.length)
+      Promise.all(tasks).then(() => localStorage.setItem(SETTINGS_KEY, JSON.stringify(stored))).catch(() => {})
+  }).catch(() => {})
 }
 
 // ── Token usage (no sensitive data) ──────────────────────────────────────────

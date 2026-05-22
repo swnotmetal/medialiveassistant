@@ -10,7 +10,7 @@ type Phase = 'loading' | 'login' | 'setup' | 'workspace'
 export default function App() {
   const [phase,    setPhase]    = useState<Phase>('loading')
   const [settings, setSettings] = useState<AppSettings>({
-    apiKey: '', model: 'gemini-2.0-flash', prompts: DEFAULT_PROMPTS,
+    apiKey: '', openaiApiKey: '', model: 'gemini-2.5-flash', prompts: DEFAULT_PROMPTS,
   })
 
   // Async init: restore session and decrypt settings from localStorage

@@ -1,4 +1,4 @@
-name = "medialiveassistant"
+name = "tanuki-media-assistant"
 compatibility_date = "2025-01-01"
 
 # Serve the Vite build output as static assets.

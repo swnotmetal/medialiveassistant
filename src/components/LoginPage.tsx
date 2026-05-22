@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import {
   getStoredHash, setupPassword, loginWithPassword, isSessionAuthed,
 } from '../utils/storage'
+import tanukilogo from '../assets/logo/tanukilogo-removebg.png'
 
 interface Props { onLogin: () => void }
 
@@ -56,83 +57,109 @@ export default function LoginPage({ onLogin }: Props) {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950 flex flex-col md:flex-row">
+    <div className="min-h-screen bg-zinc-950 flex flex-col">
+    <div className="flex-1 flex flex-col md:flex-row">
 
       {/* ── Left column: login form ── */}
       <div className="w-full md:w-2/5 flex flex-col justify-center px-10 py-16 md:border-r border-zinc-800">
         <div className="max-w-xs mx-auto w-full">
 
-          {/* Brand */}
-          <div className="mb-12">
-            <div className="flex items-center gap-2 mb-6">
-              <span className="w-2 h-2 rounded-full bg-sky-500 shrink-0" />
-              <span className="text-[10px] font-bold tracking-[0.18em] uppercase text-zinc-500">
-                Media Live Assistant
-              </span>
+          {/* ── Hero brand block ── */}
+          <div className="flex flex-col items-center text-center mb-10">
+            {/* Logo — removebg, floats on dark bg */}
+            <div className="relative mb-5">
+              <img
+                src={tanukilogo}
+                alt="貉捷 Tanuki"
+                className="w-36 h-36 object-contain"
+                style={{ filter: 'drop-shadow(0 8px 32px rgba(255,255,255,0.06))' }}
+              />
+              {/* Mask Gemini badge at bottom-right */}
+              <div className="absolute bottom-0 right-0 w-5 h-5 bg-zinc-950" />
             </div>
-            <h1 className="text-3xl font-extrabold text-white leading-tight tracking-tight">
+
+            <p className="text-xl font-extrabold tracking-[0.15em] text-white mb-1.5">貉捷</p>
+            <p className="text-[11px] text-zinc-600 tracking-[0.08em] leading-relaxed">
+              Crafty, like your neighborhood's tanuki
+            </p>
+          </div>
+
+          {/* ── Form section ── */}
+          <div>
+            <h1 className="text-2xl font-extrabold text-white leading-tight tracking-tight mb-1">
               {isFirst ? '创建密码' : '输入密码'}
             </h1>
-            <p className="text-zinc-500 text-sm mt-2 leading-relaxed">
+            <p className="text-zinc-500 text-sm mb-6 leading-relaxed">
               {isFirst
                 ? '密码只存储在你的本地浏览器，用于加密你的 API Key。'
                 : '继续使用前请验证身份。'}
             </p>
-          </div>
 
-          {/* Form */}
-          <form onSubmit={submit} className="space-y-4">
-            <div>
-              <label className="section-label block mb-2" htmlFor="pw">
-                {isFirst ? '设置密码（至少 4 位）' : '密码'}
-              </label>
-              <input
-                id="pw" type="password" value={pw}
-                onChange={e => setPw(e.target.value)}
-                placeholder="••••••••"
-                className="field"
-                autoFocus autoComplete={isFirst ? 'new-password' : 'current-password'}
-              />
-            </div>
-
-            {isFirst && (
+            <form onSubmit={submit} className="space-y-4">
               <div>
-                <label className="section-label block mb-2" htmlFor="pw2">确认密码</label>
+                <label className="section-label block mb-2" htmlFor="pw">
+                  {isFirst ? '设置密码（至少 4 位）' : '密码'}
+                </label>
                 <input
-                  id="pw2" type="password" value={pw2}
-                  onChange={e => setPw2(e.target.value)}
+                  id="pw" type="password" value={pw}
+                  onChange={e => setPw(e.target.value)}
                   placeholder="••••••••"
-                  className="field" autoComplete="new-password"
+                  className="field"
+                  autoFocus autoComplete={isFirst ? 'new-password' : 'current-password'}
                 />
               </div>
+
+              {isFirst && (
+                <div>
+                  <label className="section-label block mb-2" htmlFor="pw2">确认密码</label>
+                  <input
+                    id="pw2" type="password" value={pw2}
+                    onChange={e => setPw2(e.target.value)}
+                    placeholder="••••••••"
+                    className="field" autoComplete="new-password"
+                  />
+                </div>
+              )}
+
+              {err && <p className="text-red-400 text-xs font-medium">{err}</p>}
+
+              <button type="submit" disabled={busy} className="btn-primary w-full mt-2">
+                {busy && <span className="spinner" />}
+                {isFirst ? '创建并进入' : '进入'}
+              </button>
+            </form>
+
+            {!isFirst && (
+              <p className="text-zinc-600 text-[11px] mt-6 leading-relaxed">
+                忘记密码？在浏览器控制台执行{' '}
+                <code className="text-zinc-500 font-mono bg-zinc-900 px-1 py-0.5 rounded text-[10px]">
+                  localStorage.clear()
+                </code>{' '}
+                后刷新页面重新设置（API Key 需重新输入）。
+              </p>
             )}
+          </div>
 
-            {err && <p className="text-red-400 text-xs font-medium">{err}</p>}
-
-            <button type="submit" disabled={busy} className="btn-primary w-full mt-2">
-              {busy && <span className="spinner" />}
-              {isFirst ? '创建并进入' : '进入'}
-            </button>
-          </form>
-
-          {!isFirst && (
-            <p className="text-zinc-600 text-[11px] mt-6 leading-relaxed">
-              忘记密码？在浏览器控制台执行{' '}
-              <code className="text-zinc-500 font-mono bg-zinc-900 px-1 py-0.5 rounded text-[10px]">
-                localStorage.clear()
-              </code>{' '}
-              后刷新页面重新设置（API Key 需重新输入）。
-            </p>
-          )}
         </div>
       </div>
 
       {/* ── Right column: usage guide ── */}
-      <div className="hidden md:flex w-3/5 flex-col justify-center px-16 py-16">
-        <div className="max-w-lg">
+      <div className="hidden md:flex w-3/5 flex-col justify-center px-16 py-16 relative overflow-hidden">
 
-          {/* Heading */}
-          <p className="text-[10px] font-bold tracking-[0.18em] uppercase text-zinc-600 mb-6">
+        {/* Background logo watermark */}
+        <div
+          className="absolute inset-0 flex items-center justify-end pr-8 pointer-events-none select-none"
+          aria-hidden="true"
+        >
+          <div className="relative w-[55%] aspect-square opacity-[0.04]">
+            <img src={tanukilogo} alt="" className="w-full h-full object-contain" />
+            <div className="absolute bottom-0 right-0 w-[20%] h-[20%] bg-zinc-950" />
+          </div>
+        </div>
+
+        <div className="max-w-lg relative z-10">
+
+          <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-zinc-600 mb-6">
             使用说明
           </p>
           <h2 className="text-2xl font-extrabold text-white leading-tight tracking-tight mb-3">
@@ -172,6 +199,24 @@ export default function LoginPage({ onLogin }: Props) {
 
         </div>
       </div>
+    </div>
+
+    {/* ── Author footer ── */}
+    <footer className="shrink-0 flex items-center justify-center gap-2.5 py-3 border-t border-zinc-900">
+      <span className="text-[10px] text-zinc-600">@Shuang Wu 2026 All rights reserved</span>
+      <span className="text-zinc-800 text-[10px]">·</span>
+      <a
+        href="https://github.com/swnotmetal"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="GitHub"
+        className="text-zinc-700 hover:text-zinc-400 transition-colors duration-150"
+      >
+        <svg viewBox="0 0 16 16" width="13" height="13" fill="currentColor" aria-hidden="true">
+          <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+        </svg>
+      </a>
+    </footer>
 
     </div>
   )

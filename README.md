@@ -9,6 +9,12 @@
   <i>Crafty, like your neighborhood's tanuki</i>
 </p>
 
+<p align="center">
+  <a href="https://tanuki-media-assistant.swbuilds.workers.dev">🔗 在线使用</a>
+  &nbsp;·&nbsp;
+  <a href="https://github.com/swnotmetal/tanuki-media-assistant/releases/tag/v1.0.0">v1.0.0</a>
+</p>
+
 ---
 
 专为媒体人设计的轻量 AI 文字助手。一键摘要、翻译、改写，完全运行于浏览器本地，无账号、无后端、无数据上传。
@@ -27,11 +33,11 @@
 
 ## 快速开始
 
-1. 访问部署地址，首次使用时设置本地密码
+1. 访问[在线地址](https://tanuki-media-assistant.swbuilds.workers.dev)，首次使用时设置本地密码
 2. 进入**设置**，粘贴 [Gemini API Key](https://aistudio.google.com/app/apikey)（免费）
 3. 点击操作按钮处理输入内容
 
-## 部署（Cloudflare Pages）
+## 部署（Cloudflare Workers）
 
 ```
 Build command : npm run build
@@ -39,6 +45,8 @@ Output dir    : dist
 Node version  : 18
 ```
 
+Push 到 `main` 分支后由 GitHub Actions 自动构建并部署。
+
 ## 技术栈
 
-React 18 · TypeScript · Vite · Tailwind CSS 3 · Google Gemini API · Jina Reader
+React 18 · TypeScript · Vite · Tailwind CSS 3 · Google Gemini API · Jina Reader · Cloudflare Workers

@@ -32,6 +32,8 @@
 
 无后端。除调用 Gemini / OpenAI API 时的请求外，没有任何数据离开你的浏览器。你的 API Key 经 AES-256-GCM 加密后存入 `localStorage`，密钥由你的密码通过 PBKDF2（100,000 次迭代）派生；登录状态以同一体系的哨兵值验证，不存储原始密码或其哈希。
 
+> **建议使用 VPN**：每次调用 AI API，你的 IP 地址、请求时间及输入内容都会经过网络传输到 Google / OpenAI 的服务器。使用可信 VPN 可以隐藏你的真实 IP，避免网络运营商或公共 Wi-Fi 记录你的请求目标，为 API Key 和对话内容多加一层保护——尤其在处理敏感题材或使用公共网络时。
+
 ## 快速开始
 
 1. 访问[在线地址](https://tanuki-media-assistant.swbuilds.workers.dev)，首次使用时设置本地密码

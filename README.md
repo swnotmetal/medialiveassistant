@@ -12,7 +12,7 @@
 <p align="center">
   <a href="https://tanuki-media-assistant.swbuilds.workers.dev">🔗 在线使用</a>
   &nbsp;·&nbsp;
-  <a href="https://github.com/swnotmetal/tanuki-media-assistant/releases/tag/v1.0.0">v1.0.0</a>
+  <a href="https://github.com/swnotmetal/tanuki-media-assistant/releases/tag/v1.1.0">v1.1.0</a>
 </p>
 
 ---
@@ -21,21 +21,22 @@
 
 ## 功能
 
+- **双引擎支持** — 同时接入 Google Gemini 与 OpenAI，按需切换模型
 - **一键操作按钮** — 自定义常用指令，悬停即可编辑，无需弹窗
 - **链接抓取** — 粘贴新闻链接，通过 Jina Reader 自动提取正文
 - **流式输出** — 结果逐字生成，实时可见
 - **黄金比例布局** — 输出面板随内容增长自适应扩展
-- **Token 计数** — 跟踪每日用量，对照 Gemini 免费额度（1500 次/天）
+- **Token 计数** — 跟踪每次请求用量
 
 ## 隐私与安全
 
-无后端。除调用 Google Gemini API 时的请求外，没有任何数据离开你的浏览器。你的 API Key 经 AES-256-GCM 加密后存入 `localStorage`，密钥由你的密码通过 PBKDF2（100,000 次迭代）派生。
+无后端。除调用 Gemini / OpenAI API 时的请求外，没有任何数据离开你的浏览器。你的 API Key 经 AES-256-GCM 加密后存入 `localStorage`，密钥由你的密码通过 PBKDF2（100,000 次迭代）派生；登录状态以同一体系的哨兵值验证，不存储原始密码或其哈希。
 
 ## 快速开始
 
 1. 访问[在线地址](https://tanuki-media-assistant.swbuilds.workers.dev)，首次使用时设置本地密码
-2. 进入**设置**，粘贴 [Gemini API Key](https://aistudio.google.com/app/apikey)（免费）
-3. 点击操作按钮处理输入内容
+2. 进入**设置**，粘贴 [Gemini API Key](https://aistudio.google.com/app/apikey)（免费）和/或 OpenAI API Key
+3. 在模型选择器中选择目标模型，点击操作按钮处理输入内容
 
 ## 部署（Cloudflare Workers）
 
@@ -49,4 +50,4 @@ Push 到 `main` 分支后由 GitHub Actions 自动构建并部署。
 
 ## 技术栈
 
-React 18 · TypeScript · Vite · Tailwind CSS 3 · Google Gemini API · Jina Reader · Cloudflare Workers
+React 18 · TypeScript · Vite · Tailwind CSS 3 · Google Gemini API · OpenAI API · Jina Reader · Cloudflare Workers
